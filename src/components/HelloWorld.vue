@@ -7,11 +7,15 @@ defineProps<{ msg: string }>()
 const count = ref(0)
 let hello = "World";
 
-invoke('greet', { name: 'Fronk' })
+// invoke('greet', { name: 'Fronk' })
+//     .then((response) => {
+//         hello = response;
+//     });
+
+invoke('get_lyrics', { author: "Justin Bieber", title: "Baby" })
     .then((response) => {
         hello = response;
     });
-
 
 </script>
 
@@ -19,7 +23,10 @@ invoke('greet', { name: 'Fronk' })
   <h1>{{ msg }}</h1>
 
   <div class="card">
-    <button type="button" @click="count++">count is {{ count }}, hello {{ hello }}!</button>
+    <button type="button" @click="count++">count is {{ count }}, hello!</button>
+    <p v-for="item in hello">
+      {{ item }}
+    </p>
     <p>
       Edit
       <code>components/HelloWorld.vue</code> to test HMR
