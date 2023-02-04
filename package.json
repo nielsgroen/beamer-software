@@ -1,0 +1,24 @@
+{
+  "name": "presentation-test",
+  "version": "1.0.0",
+  "description": "Presentation software for managing song texts and creating slides for songs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "debug": "tauri dev",
+    "build-release": "tauri build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nielsgroen/presentation-test.git"
+  },
+  "author": "Niels Groeneveld",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nielsgroen/presentation-test/issues"
+  },
+  "homepage": "https://github.com/nielsgroen/presentation-test#readme",
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.2.3"
+  }
+}
