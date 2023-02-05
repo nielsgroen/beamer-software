@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+// import HelloWorld from './components/HelloWorld.vue'
+import {ref} from "vue";
+
+const text = ref();
 </script>
 
 <template>
@@ -11,20 +14,13 @@ import HelloWorld from './components/HelloWorld.vue'
       <img src="assets/vue.svg" class="logo vue" alt="Vue logo" />
     </a>
   </div>
-  <HelloWorld msg="Vite + Vue" />
+  <span class="p-float-label">
+    <InputText id="test-button" type="text" v-model="text" />
+    <label for="test-button">TestyMcTestface</label>
+  </span>
+<!--  <HelloWorld msg="Vite + Vue" />-->
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
+
 </style>
