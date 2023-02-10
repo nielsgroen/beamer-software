@@ -8,7 +8,8 @@ import Button from "primevue/button";
 import Textarea from 'primevue/textarea';
 
 import './css/normalize.css';
-import './css/skeleton.css';
+// import './css/skeleton.css';
+import 'primeflex/primeflex.css';
 
 import 'primevue/resources/themes/saga-blue/theme.css'; //theme
 import 'primevue/resources/primevue.min.css'; //core css

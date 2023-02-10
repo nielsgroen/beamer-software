@@ -15,7 +15,8 @@
     "@tauri-apps/api": "^1.2.0",
     "primeicons": "^6.0.1",
     "primevue": "^3.23.0",
-    "vue": "^3.2.45"
+    "vue": "^3.2.45",
+    "primeflex": "3.3.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.2.3",

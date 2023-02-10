@@ -112,6 +112,7 @@ fn parse_song_text(document: &Html, remove_block_quotes: bool) -> Vec<Verse> {
     }
     let verses_lines = verses_lines.map(|verse| verse.map(|line| REMOVE_TAG_REGEX.replace_all(&line, "").into_owned()));
 
+    // Remove all Blockquotes if that option is enabled, while making sure types stay consistent
     let new_verses_lines;
     if remove_block_quotes {
         lazy_static! {
@@ -124,7 +125,6 @@ fn parse_song_text(document: &Html, remove_block_quotes: bool) -> Vec<Verse> {
             })
             .collect::<Vec<_>>()
             .into_iter();
-
     } else {
         new_verses_lines = verses_lines
             .map(|verse| verse.collect())
