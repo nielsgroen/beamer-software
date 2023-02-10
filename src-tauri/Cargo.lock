@@ -52,6 +52,8 @@ name = "app"
 version = "0.1.0"
 dependencies = [
  "genius-rs",
+ "lazy_static",
+ "regex",
  "reqwest",
  "scraper",
  "serde",

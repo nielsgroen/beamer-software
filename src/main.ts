@@ -5,6 +5,7 @@ import PrimeVue from 'primevue/config';
 
 import InputText from "primevue/inputtext";
 import Button from "primevue/button";
+import Textarea from 'primevue/textarea';
 
 import './css/normalize.css';
 import './css/skeleton.css';
@@ -18,5 +19,6 @@ app.use(PrimeVue);
 
 app.component('InputText', InputText);
 app.component('Button', Button);
+app.component('Textarea', Textarea);
 app.mount('#app');
 
