@@ -39,4 +39,8 @@ impl Verse {
             lines
         }
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.lines.is_empty()
+    }
 }

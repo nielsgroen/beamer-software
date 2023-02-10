@@ -59,7 +59,7 @@ fn get_lyrics(author: &str, title: &str) -> Song {
     //     }
     // }
 
-    let verses = parse_song_text(&document);
+    let verses = parse_song_text(&document, true);
 
     Song {
         title: "Baby".to_string(),
@@ -75,7 +75,7 @@ fn get_lyrics(author: &str, title: &str) -> Song {
     // vec!["Henkie".to_string()]
 }
 
-fn parse_song_text(document: &Html) -> Vec<Verse> {
+fn parse_song_text(document: &Html, remove_block_quotes: bool) -> Vec<Verse> {
     let lyrics_selector = scraper::Selector::parse("div.Lyrics__Container-sc-1ynbvzw-6.YYrds").unwrap();
 
     let html_sections = document.select(&lyrics_selector)
@@ -101,23 +101,44 @@ fn parse_song_text(document: &Html) -> Vec<Verse> {
 
     // Remove all divs with contents: usually ads
     lazy_static! {
-        static ref remove_div_regex: Regex = Regex::new("<div>.*</div>").unwrap();
+        static ref REMOVE_DIV_REGEX: Regex = Regex::new("<div>.*</div>").unwrap();
     }
-    let verses_lines = verses_lines.map(|verse| verse.into_iter().map(|line| remove_div_regex.replace_all(&line, "").into_owned()));
+    let verses_lines = verses_lines.map(|verse| verse.into_iter().map(|line| REMOVE_DIV_REGEX.replace_all(&line, "").into_owned()));
 
     // Remove all lingering tags, e.g.: <i> and </i>
     // We want to keep the text in between
     lazy_static! {
-        static ref remove_tag_regex: Regex = Regex::new("<.*?>").unwrap();
+        static ref REMOVE_TAG_REGEX: Regex = Regex::new("<.*?>").unwrap();
     }
-    let verses_lines = verses_lines.map(|verse| verse.map(|line| remove_tag_regex.replace_all(&line, "").into_owned()));
+    let verses_lines = verses_lines.map(|verse| verse.map(|line| REMOVE_TAG_REGEX.replace_all(&line, "").into_owned()));
+
+    let new_verses_lines;
+    if remove_block_quotes {
+        lazy_static! {
+            static ref REMOVE_BLOCKQUOTES_REGEX: Regex = Regex::new(r#"\[.*?\]"#).unwrap();
+        }
+        new_verses_lines = verses_lines
+            .map(|verse| {
+                let a = verse.map(|line| REMOVE_BLOCKQUOTES_REGEX.replace_all(&line, "").into_owned());
+                a.collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>()
+            .into_iter();
+
+    } else {
+        new_verses_lines = verses_lines
+            .map(|verse| verse.collect())
+            .collect::<Vec<_>>()
+            .into_iter();
+    }
 
     // Remove empty lines
-    let verses_lines = verses_lines.map(|verse| verse.filter(|line| !line.is_empty()));
+    let verses_lines = new_verses_lines.map(|verse| verse.into_iter().filter(|line| !line.is_empty()));
 
     let verses = verses_lines
         // .map(|verse| verse.map(|line| line.into_owned()))
         .map(|verse| Verse::new(verse.collect()))
+        .filter(|verse| !verse.is_empty())
         .collect();
 
     verses
