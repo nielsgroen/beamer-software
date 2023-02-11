@@ -5,7 +5,7 @@
 
 use lazy_static::lazy_static;
 use scraper::{Html, Node};
-use crate::song::{Song, Verse};
+use crate::song::{Song, SongSlot, SongSlotType, Verse};
 use regex::Regex;
 
 mod song;
@@ -14,6 +14,31 @@ mod song;
 fn greet(name: &str) -> String {
   format!("Hello, {}!", name)
 }
+
+#[tauri::command]
+fn get_songs() -> Vec<SongSlot> {
+    // TODO: placeholder
+    let song = get_lyrics("asd", "asd");
+
+    vec![
+        // SongSlot::Empty(0),
+        // SongSlot::Song(1, song.clone()),
+        // SongSlot::Song(2, song.clone()),
+        SongSlot {
+            id: 0,
+            slot: SongSlotType::Empty,
+        },
+        SongSlot {
+            id: 1,
+            slot: SongSlotType::Song(song.clone()),
+        },
+        SongSlot {
+            id: 2,
+            slot: SongSlotType::Song(song.clone()),
+        },
+    ]
+}
+
 
 
 #[tauri::command]
@@ -150,7 +175,7 @@ fn parse_song_text(document: &Html, remove_block_quotes: bool) -> Vec<Verse> {
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet, get_lyrics])
+        .invoke_handler(tauri::generate_handler![greet, get_lyrics, get_songs])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

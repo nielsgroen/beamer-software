@@ -5,10 +5,16 @@ pub struct SongList {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum SongSlot {
+pub enum SongSlotType {
     Empty,
     Song(Song),
     // Can add more: Like a picture
+}
+
+#[derive(Serialize, Deserialize, Debug , Clone)]
+pub struct SongSlot {
+    pub id: u64,
+    pub slot: SongSlotType,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
