@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SongList {
     pub songs: Vec<SongSlot>,
 }
@@ -17,11 +18,16 @@ pub struct SongSlot {
     pub slot: SongSlotType,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Song {
     pub title: String,
     pub author: String,
     pub verses: Vec<Verse>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct Verse {
+    pub lines: Vec<String>,
 }
 
 impl Song {
@@ -32,11 +38,6 @@ impl Song {
             verses,
         }
     }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Verse {
-    pub lines: Vec<String>,
 }
 
 impl Verse {

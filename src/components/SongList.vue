@@ -3,61 +3,19 @@
 import {computed, onMounted, ref} from "vue";
 import {invoke} from "@tauri-apps/api";
 import OrderList from "primevue/orderlist";
-// import { useModelWrapper } from "../js/modelwrapper.js";
-
-// const props = defineProps(["songsList"])
-//
-// onMounted(async () => {
-//     const songs = await invoke("get_songs", {});
-//
-//     console.log(songs);
-//     songsList.value = songs;
-// })
-
 
 export default {
   components: { OrderList },
   props: ["modelValue", "songSelection"],
-  // props: {
-  //   modelValue: {
-  //     type: Array,
-  //     default: () => [],
-  //   }
-  // },
   setup(props, { emit }) {
     const songList = ref([]);
 
-    // function bubbleReorder(reorderEvent) {
-    //   emit('update:modelValue', reorderEvent.value);
-    // }
-    //
-    // function bubbleSelected(selectionEvent) {
-    //   console.log("selected", selectionEvent.value);
-    // }
-    // onMounted(async () => {
-    //   songList.value = await invoke("get_songs", {});
-    //   console.log("songList", songList);
-    // })
-
     return {
       songList,
-      // bubbleReorder,
     }
   }
 }
 
-
-// export default {
-//   props: ["modelValue"],
-//   setup(props, { emit }) {
-//     return {
-//       songsList: useModelWrapper(props, emit, 'modelValue')
-//     }
-//   },
-//   async mounted() {
-//     this.songsList = await invoke("get_songs", {})
-//   }
-// }
 </script>
 
 <template>

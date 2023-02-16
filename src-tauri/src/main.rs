@@ -5,99 +5,84 @@
 
 use lazy_static::lazy_static;
 use scraper::{Html, Node};
-use crate::song::{Song, SongSlot, SongSlotType, Verse};
+use crate::song::{Song, SongList, SongSlot, SongSlotType, Verse};
 use regex::Regex;
+use anyhow::Result;
+use tauri::async_runtime::RwLock;
 
 mod song;
 
-#[tauri::command]
-fn greet(name: &str) -> String {
-  format!("Hello, {}!", name)
+/// IMPORTANT ALWAYS ACQUIRE LOCKS IN ORDER LISTED
+pub struct ProgramState {
+    pub song_list: RwLock<SongList>,
+    pub new_song_id: RwLock<u64>,
+    //     ... e.g. currently showing slide
 }
 
 #[tauri::command]
-fn get_songs() -> Vec<SongSlot> {
-    // TODO: placeholder
-    let song = get_lyrics("asd", "asd");
-
-    vec![
-        // SongSlot::Empty(0),
-        // SongSlot::Song(1, song.clone()),
-        // SongSlot::Song(2, song.clone()),
-        SongSlot {
-            id: 0,
-            slot: SongSlotType::Empty,
-        },
-        SongSlot {
-            id: 1,
-            slot: SongSlotType::Song(song.clone()),
-        },
-        SongSlot {
-            id: 2,
-            slot: SongSlotType::Song(song.clone()),
-        },
-    ]
+async fn get_songs(
+    program_state: tauri::State<'_, ProgramState>,
+) -> Result<SongList, ()> {
+    let song_list  = program_state.song_list.read().await;
+    Ok((*song_list).clone())
 }
 
+#[tauri::command]
+async fn add_searched_song(
+    author: &str,
+    title: &str,
+    program_state: tauri::State<'_, ProgramState>,
+) -> Result<SongList, ()> {
 
+    let new_song = get_lyrics(
+        author,
+        title,
+    ).await?;
+
+    let mut song_list = program_state.song_list.write().await;
+    let mut new_song_id = program_state.new_song_id.write().await;
+
+    song_list.songs.push(
+        SongSlot {
+            id: *new_song_id,
+            slot: SongSlotType::Song(new_song),
+        }
+    );
+    *new_song_id += 1;
+
+    Ok((*song_list).clone())
+}
 
 #[tauri::command]
-fn get_lyrics(author: &str, title: &str) -> Song {
-    let response = reqwest::blocking::get(
+async fn update_song_list(
+    new_song_list: SongList,
+    program_state: tauri::State<'_, ProgramState>,
+) -> Result<(), ()> {
+    let mut song_list = program_state.song_list.write().await;
+    *song_list = new_song_list;
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn get_lyrics(author: &str, title: &str) -> Result<Song, ()> {
+    let response = reqwest::get(
         "https://genius.com/Justin-bieber-baby-lyrics",
     )
+        .await
         .unwrap()
         .text()
+        .await
         .unwrap();
     let document = scraper::Html::parse_document(&response);
-    // let lyrics_selector = scraper::Selector::parse("div.Lyrics__Container-sc-1ynbvzw-6.YYrds").unwrap();
-    // let lyrics = document.select(&lyrics_selector).map(|x| x.text().map(|a| a.to_owned()));
-    // let mut children = document.select(&lyrics_selector).map(|x| x.children()).flatten();
-    //
-    // let mut verses: Vec<Verse> = Vec::new();
-    // let mut current_verse: Vec<String> = Vec::new();
-    // let mut current_num_elements_seen = 0;
-    // for child in children {
-    //     match child.value() {
-    //         Node::Text(text) => {
-    //             let text_string = text.to_string();
-    //             println!("{:?}", text_string);
-    //
-    //             if text_string.starts_with("[") && text_string.ends_with("]") {
-    //                 continue;
-    //             }
-    //
-    //             if current_verse.len() > 0 && current_num_elements_seen > 1 {
-    //                 verses.push(Verse::new(current_verse.clone()));
-    //                 current_verse = Vec::new();
-    //             }
-    //
-    //             current_verse.push(text.to_string());
-    //             current_num_elements_seen = 0;
-    //         },
-    //         Node::Element(el) => {
-    //             println!("{:?}", el.name);
-    //
-    //             current_num_elements_seen += 1;
-    //         },
-    //         _ => (),
-    //     }
-    // }
 
     let verses = parse_song_text(&document, true);
 
-    Song {
+    Ok(Song {
         title: "Baby".to_string(),
         author: "Justin Bieber".to_string(),
         verses,
-    }
-    // for verse in verses {
-    //     println!("{:?}", verse);
-    // }
-
-    // lyrics.collect::<Vec<_>>().join("\n")
-    // verses.flatten().collect()
-    // vec!["Henkie".to_string()]
+    })
 }
 
 fn parse_song_text(document: &Html, remove_block_quotes: bool) -> Vec<Verse> {
@@ -169,16 +154,20 @@ fn parse_song_text(document: &Html, remove_block_quotes: bool) -> Vec<Verse> {
     verses
 }
 
-
-
-
-
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet, get_lyrics, get_songs])
+        .manage(ProgramState {
+            song_list: RwLock::new(SongList {
+                songs: vec![
+                    SongSlot {
+                        id: 0,
+                        slot: SongSlotType::Empty,
+                    },
+                ],
+            }),
+            new_song_id: RwLock::new(1),
+        })
+        .invoke_handler(tauri::generate_handler![get_songs, get_lyrics, add_searched_song, update_song_list])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-
-// https://genius.com/Justin-bieber-baby-lyrics
-
