@@ -89,23 +89,37 @@ export default {
 </script>
 
 <template>
-  <div class="grid">
-    <div class="col-8">
-<!--      <SongEditor v-model="songList" />-->
-      <SongList :model-value="songList" @update:model-value="processClientSongListUpdate($event)" @update:song-selection="selectedSong = $event" />
+  <div class="surface-ground px-4 py-8 md:px-6 lg:px-8 max-vh">
+    <div class="text-900 font-bold text-6xl mb-4 text-center">Beamer Software</div>
+    <div class="grid">
+      <div class="col-12 lg:col-8">
+        <div class="p-3 h-full">
+          <div class="shadow-2 p-3 h-full flex flex-column surface-card">
+            <SongList :model-value="songList" @update:model-value="processClientSongListUpdate($event)" @update:song-selection="selectedSong = $event" />
+            <div class="grid">
+              <div class="col-6">
+                <Button label="Remove First Song" class="p-button-danger" @click="removeFirst" />
+              </div>
+              <div class="col-6">
+                <Button label="Add Searched Song" class="p-button-success" @click="addSearchedSong('justin bieber', 'baby')" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-4">
+        <span class="p-float-label">
+          <InputText id="test-button" type="text" v-model="testText" />
+          <label for="test-button">TestyMcTestface</label>
+        </span>
+      </div>
     </div>
-    <div class="col-4">
-      <span class="p-float-label">
-        <InputText id="test-button" type="text" v-model="testText" />
-        <label for="test-button">TestyMcTestface</label>
-      </span>
-      <button @click="removeFirst">Clicky</button>
-      <button @click="addSearchedSong('justin bieber', 'baby')">Clicky</button>
-    </div>
+    <Toast />
   </div>
-  <Toast />
 </template>
 
 <style scoped>
-
+.max-vh {
+  height: 100vh;
+}
 </style>
