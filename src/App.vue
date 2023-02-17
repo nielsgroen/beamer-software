@@ -15,6 +15,9 @@ export default {
     const selectedSong = ref([]);
     const geniusToken = ref("");
 
+    const searchTitle = ref("");
+    const searchAuthor = ref("");
+
     onMounted(async () => {
       const result: Array = await invoke("get_songs", {});
       songList.value = result.songs;
@@ -107,6 +110,8 @@ export default {
       songList,
       selectedSong,
       geniusToken,
+      searchTitle,
+      searchAuthor,
       processClientSongListUpdate,
       onMounted,
       removeFirst,
@@ -128,10 +133,22 @@ export default {
             <SongList :model-value="songList" @update:model-value="processClientSongListUpdate($event)" @update:song-selection="selectedSong = $event" />
             <div class="grid">
               <div class="col-6">
+                <span class="p-float-label">
+                  <InputText id="search-author" type="text" v-model="searchAuthor" />
+                  <label for="search-author">Search Author</label>
+                </span>
+              </div>
+              <div class="col-6">
+                <span class="p-float-label">
+                  <InputText id="search-title" type="text" v-model="searchTitle" />
+                  <label for="search-title">Search Title</label>
+                </span>
+              </div>
+              <div class="col-6">
                 <Button label="Remove First Song" class="p-button-danger" @click="removeFirst" />
               </div>
               <div class="col-6">
-                <Button label="Add Searched Song" class="p-button-success" @click="addSearchedSong('justin bieber', 'baby')" />
+                <Button label="Add Searched Song" class="p-button-success" @click="addSearchedSong(searchAuthor, searchTitle)" />
               </div>
             </div>
           </div>
