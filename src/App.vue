@@ -13,12 +13,15 @@ export default {
 
     const songList = ref([]);
     const selectedSong = ref([]);
-    const testText = ref("henk");
+    const geniusToken = ref("");
 
     onMounted(async () => {
       const result: Array = await invoke("get_songs", {});
       songList.value = result.songs;
       console.log("songList mounted", songList);
+
+      const newToken: string = await invoke("get_genius_token", {});
+      geniusToken.value = newToken;
     })
 
     async function removeFirst() {
@@ -29,6 +32,12 @@ export default {
 
     async function addSearchedSong(author: String, title: String) {
       try {
+        toast.add({
+          severity: "info",
+          summary: "Searching",
+          detail: `Searching for ${author} - ${title}.`,
+          life: 3000,
+        });
         const result: Array = await invoke('add_searched_song', { author, title });
         songList.value = result.songs;
         toast.add({
@@ -39,7 +48,14 @@ export default {
         });
         console.log("Toast called");
       } catch (error) {
+        console.error(error);
         console.log("error called");
+        toast.add({
+          severity: "error",
+          summary: "Failed to load song",
+          detail: error,
+          life: 3000,
+        })
       }
     }
 
@@ -65,6 +81,18 @@ export default {
       }
     }
 
+    async function saveToken() {
+      await invoke("set_genius_token", { newToken: geniusToken.value });
+    }
+
+    async function saveConfig() {
+      try {
+        await invoke("save_config", {});
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     watch(songList, (currentValue, oldValue) => {
       console.log("old val", oldValue);
       console.log("new val", currentValue);
@@ -78,11 +106,13 @@ export default {
     return {
       songList,
       selectedSong,
-      testText,
+      geniusToken,
       processClientSongListUpdate,
       onMounted,
       removeFirst,
       addSearchedSong,
+      saveToken,
+      saveConfig,
     }
   }
 }
@@ -109,8 +139,10 @@ export default {
       </div>
       <div class="col-4">
         <span class="p-float-label">
-          <InputText id="test-button" type="text" v-model="testText" />
-          <label for="test-button">TestyMcTestface</label>
+          <InputText id="test-button" type="text" v-model="geniusToken" />
+          <label for="test-button">Genius Token</label>
+          <Button label="Save Genius Token" class="p-button-success" @click="saveToken" />
+          <Button label="Save Config to File" class="p-button-success" @click="saveConfig" />
         </span>
       </div>
     </div>

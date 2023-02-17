@@ -24,6 +24,7 @@ genius-rs = "0.5.0"
 regex = "1.7.1"
 lazy_static = "1.4.0"
 anyhow = "1.0.69"
+tower-service = "0.3.2"
 
 [features]
 # by default Tauri runs in production mode
