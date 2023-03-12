@@ -55,12 +55,20 @@
     },
     "windows": [
       {
+        "label": "main",
         "fullscreen": false,
-        "height": 600,
+        "height": 800,
+        "width": 1200,
         "resizable": true,
+        "title": "Main Screen"
+      },
+      {
+        "label": "presentation",
+        "fullscreen": false,
+        "height": 900,
+        "width": 1400,
         "title": "Presentation Screen",
-        "width": 800,
-        "url": "src"
+        "url": "presentation.html"
       }
     ]
   }
