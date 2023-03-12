@@ -149,6 +149,22 @@ async fn save_config(
     Ok(())
 }
 
+#[tauri::command]
+async fn next_verse(
+    program_state: tauri::State<'_, ProgramState>,
+    app_handle: tauri::AppHandle,
+) -> Result<(), String> {
+    use tauri::Manager;
+
+    let song_list = program_state.song_list.read().await;
+    let mut selection = program_state.currently_selected.write().await;
+
+    selection.next(&song_list);
+    let _ = app_handle.emit_to("presentation", "update-verse", selection.current_verse());
+
+    Ok(())
+}
+
 async fn find_song_details(
     author: &str,
     title: &str,
@@ -306,6 +322,7 @@ fn main() {
             get_genius_token,
             set_genius_token,
             save_config,
+            next_verse,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,10 +1,11 @@
 use std::cmp::max;
 use std::vec;
+use serde::Serialize;
 use crate::song::{Song, SongList, SongSlotType, Verse};
 
 /// For tracking which verse to currently show
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize)]
 pub struct DisplaySelection {
     slot_id: u64,
     slot_position: usize,

@@ -96,6 +96,14 @@ export default {
       }
     }
 
+    async function nextVerse() {
+      try {
+        await invoke("next_verse", {});
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     watch(songList, (currentValue, oldValue) => {
       console.log("old val", oldValue);
       console.log("new val", currentValue);
@@ -118,6 +126,7 @@ export default {
       addSearchedSong,
       saveToken,
       saveConfig,
+      nextVerse,
     }
   }
 }
@@ -160,6 +169,7 @@ export default {
           <label for="test-button">Genius Token</label>
           <Button label="Save Genius Token" class="p-button-success" @click="saveToken" />
           <Button label="Save Config to File" class="p-button-success" @click="saveConfig" />
+          <Button label="Next Verse" class="p-button-help" @click="nextVerse" />
         </span>
       </div>
     </div>
