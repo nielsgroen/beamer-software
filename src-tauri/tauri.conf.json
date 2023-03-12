@@ -59,7 +59,8 @@
         "height": 600,
         "resizable": true,
         "title": "Presentation Screen",
-        "width": 800
+        "width": 800,
+        "url": "src"
       }
     ]
   }

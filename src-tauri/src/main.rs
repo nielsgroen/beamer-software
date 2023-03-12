@@ -16,8 +16,10 @@ use tower_service::Service;
 
 mod song;
 mod config;
+mod display_selection;
 
 use config::ProgramConfig;
+use crate::display_selection::DisplaySelection;
 
 const SEARCH_URL: &str = "https://api.genius.com/search";
 
@@ -27,6 +29,7 @@ pub struct ProgramState {
     pub config: RwLock<ProgramConfig>,
     pub song_list: RwLock<SongList>,
     pub new_song_id: RwLock<u64>,
+    pub currently_selected: RwLock<DisplaySelection>,
     //     ... e.g. currently showing slide
 }
 
@@ -278,17 +281,20 @@ fn main() {
             let mut config: ProgramConfig = fs::read_to_string(&config_path).ok().and_then(|x| serde_json::from_str(&x).ok()).unwrap_or_default();
             config.config_path = config_path;
 
+            let song_list = SongList {
+                songs: vec![
+                    SongSlot {
+                        id: 0,
+                        slot: SongSlotType::Empty,
+                    },
+                ],
+            };
+            let display_selection = DisplaySelection::new(&song_list, 0, None);
             (*app).manage(ProgramState {
                 config: RwLock::new(config),
-                song_list: RwLock::new(SongList {
-                    songs: vec![
-                        SongSlot {
-                            id: 0,
-                            slot: SongSlotType::Empty,
-                        },
-                    ],
-                }),
+                song_list: RwLock::new(song_list),
                 new_song_id: RwLock::new(1),
+                currently_selected: RwLock::new(display_selection),
             });
             Ok(())
         })
