@@ -7,7 +7,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "presentation",
+    "productName": "Ichthus Rotterdam Beamer Software",
     "version": "0.1.0"
   },
   "tauri": {
@@ -15,6 +15,9 @@
       "all": false,
       "window": {
         "setFullscreen": true
+      },
+      "globalShortcut": {
+        "all": true
       }
     },
     "bundle": {
@@ -32,7 +35,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "com.ichthusrotterdam.beamersoftware",
       "longDescription": "",
       "macOS": {
         "entitlements": null,

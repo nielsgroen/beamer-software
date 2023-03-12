@@ -8,7 +8,7 @@ import {ref} from "vue";
 //   verses: String[],
 // }
 
-const song = ref('');
+const song: any = ref(null);
 // song.value = await invoke('greet', { name: 'Pjiet' });
 
 async function handleClick() {

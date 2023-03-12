@@ -1,4 +1,4 @@
-use std::cmp::max;
+use std::cmp::{max, min};
 use std::vec;
 use serde::Serialize;
 use crate::song::{Song, SongList, SongSlotType, Verse};
@@ -42,7 +42,37 @@ impl DisplaySelection {
         if self.verse_num > 0 {
             self.verse_num -= 1;
         } else {
-            todo!()
+            let current_position = song_list.songs.iter().position(|x| x.id == self.slot_id);
+
+            // saturating sub: prevent underflow
+            let new_position = current_position.map(|x| x.saturating_sub(1)).unwrap_or(self.slot_position);
+
+            if new_position >= 0 && new_position < song_list.songs.len() {
+                let next_song = song_list.songs[new_position].clone();
+                let verse_num = match next_song.slot {
+                    SongSlotType::Empty => 0,
+                    SongSlotType::Song(ref song) => song.num_verses() - 1,
+                };
+
+                self.slot_id = next_song.id;
+                self.slot_position = new_position;
+                self.verse_num = verse_num;
+                self.song = Self::unwrap_or_song(&next_song.slot);
+
+            } else {
+                if let Some(next_song) = song_list.songs.last() {
+                    self.slot_id = next_song.id;
+                    self.slot_position = song_list.songs.len() - 1;
+                    self.verse_num = 0;
+                    self.song = Self::unwrap_or_song(&next_song.slot);
+
+                } else {
+                    self.slot_id = 0;
+                    self.slot_position = 0;
+                    self.verse_num = 0;
+                    self.song = Self::unwrap_or_song(&SongSlotType::Empty);
+                }
+            }
         }
     }
 
@@ -56,8 +86,7 @@ impl DisplaySelection {
 
             // If song removed: Go to song that is now at that position
             let song_list_len = song_list.songs.len();
-            let new_position= current_position.map(|x| max(x+1, song_list_len - 1)).unwrap_or(self.slot_position);
-
+            let new_position= current_position.map(|x| min(x+1, song_list_len - 1)).unwrap_or(self.slot_position);
 
             if new_position < song_list.songs.len() {
                 // Go to next if not at end
@@ -78,12 +107,10 @@ impl DisplaySelection {
                     self.song = Self::unwrap_or_song(&next_song.slot);
 
                 } else {
-                    let next_song = Self::unwrap_or_song(&SongSlotType::Empty);
-
                     self.slot_id = 0;
                     self.slot_position = 0;
                     self.verse_num = 0;
-                    self.song = next_song;
+                    self.song = Self::unwrap_or_song(&SongSlotType::Empty);
                 }
             }
         }

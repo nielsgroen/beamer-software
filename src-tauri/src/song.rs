@@ -38,6 +38,10 @@ impl Song {
             verses,
         }
     }
+
+    pub fn num_verses(&self) -> usize {
+        self.verses.len()
+    }
 }
 
 impl Verse {

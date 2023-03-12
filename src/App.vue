@@ -1,10 +1,12 @@
 <script lang="ts">
 import {onMounted, ref, watch} from "vue";
-import SongEditor from "./components/SongEditor.vue";
+// import SongEditor from "./components/SongEditor.vue";
 import {invoke} from "@tauri-apps/api";
 import SongList from "./components/SongList.vue";
 import {useToast} from "primevue/usetoast";
 import Toast from 'primevue/toast';
+import {register} from "@tauri-apps/api/globalShortcut";
+
 
 export default {
   components: {SongList},
@@ -19,12 +21,23 @@ export default {
     const searchAuthor = ref("");
 
     onMounted(async () => {
-      const result: Array = await invoke("get_songs", {});
+      const result: any = await invoke("get_songs", {});
       songList.value = result.songs;
       console.log("songList mounted", songList);
 
       const newToken: string = await invoke("get_genius_token", {});
       geniusToken.value = newToken;
+
+      try {
+        await register('right', () => {
+          nextVerse();
+        });
+        await register('left', () => {
+          previousVerse();
+        });
+      } catch (error) {
+        console.error(error);
+      }
     })
 
     async function removeFirst() {
@@ -41,7 +54,7 @@ export default {
           detail: `Searching for ${author} - ${title}.`,
           life: 3000,
         });
-        const result: Array = await invoke('add_searched_song', { author, title });
+        const result: any = await invoke('add_searched_song', { author, title });
         songList.value = result.songs;
         toast.add({
           severity: "success",
@@ -62,7 +75,7 @@ export default {
       }
     }
 
-    async function processClientSongListUpdate(newSongList) {
+    async function processClientSongListUpdate(newSongList: any) {
       console.log("process", newSongList);
 
       try {
@@ -104,6 +117,14 @@ export default {
       }
     }
 
+    async function previousVerse() {
+      try {
+        await invoke("previous_verse", {});
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     watch(songList, (currentValue, oldValue) => {
       console.log("old val", oldValue);
       console.log("new val", currentValue);
@@ -127,6 +148,7 @@ export default {
       saveToken,
       saveConfig,
       nextVerse,
+      previousVerse,
     }
   }
 }
@@ -165,11 +187,12 @@ export default {
       </div>
       <div class="col-4">
         <span class="p-float-label">
-          <InputText id="test-button" type="text" v-model="geniusToken" />
+          <InputText id="test-button" type="text" v-model="geniusToken" v-tooltip="'visit docs.genius.com or genius.com/api-clients for creating an API key.'" />
           <label for="test-button">Genius Token</label>
           <Button label="Save Genius Token" class="p-button-success" @click="saveToken" />
           <Button label="Save Config to File" class="p-button-success" @click="saveConfig" />
-          <Button label="Next Verse" class="p-button-help" @click="nextVerse" />
+          <Button label="Previous Verse" class="p-button-help" @click="previousVerse" v-tooltip.bottom="'You can use the left arrow key.'" />
+          <Button label="Next Verse" class="p-button-help" @click="nextVerse" v-tooltip.bottom="'You can use the right arrow key.'" />
         </span>
       </div>
     </div>

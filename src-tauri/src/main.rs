@@ -160,7 +160,23 @@ async fn next_verse(
     let mut selection = program_state.currently_selected.write().await;
 
     selection.next(&song_list);
-    let _ = app_handle.emit_to("presentation", "update-verse", selection.current_verse());
+    app_handle.emit_to("presentation", "update-verse", selection.current_verse()).expect("could not emit update-verse");
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn previous_verse(
+    program_state: tauri::State<'_, ProgramState>,
+    app_handle: tauri::AppHandle,
+) -> Result<(), String> {
+    use tauri::Manager;
+
+    let song_list = program_state.song_list.read().await;
+    let mut selection = program_state.currently_selected.write().await;
+
+    selection.previous(&song_list);
+    app_handle.emit_to("presentation", "update-verse", selection.current_verse()).expect("could not emit update-verse");
 
     Ok(())
 }
@@ -323,6 +339,7 @@ fn main() {
             set_genius_token,
             save_config,
             next_verse,
+            previous_verse,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
