@@ -86,7 +86,7 @@ impl DisplaySelection {
 
             // If song removed: Go to song that is now at that position
             let song_list_len = song_list.songs.len();
-            let new_position= current_position.map(|x| min(x+1, song_list_len - 1)).unwrap_or(self.slot_position);
+            let new_position= current_position.map(|x| x + 1).unwrap_or(self.slot_position);
 
             if new_position < song_list.songs.len() {
                 // Go to next if not at end
@@ -103,7 +103,7 @@ impl DisplaySelection {
                 if let Some(next_song) = song_list.songs.last() {
                     self.slot_id = next_song.id;
                     self.slot_position = song_list.songs.len() - 1;
-                    self.verse_num = 0;
+                    self.verse_num = next_song.slot.num_verses().saturating_sub(1);
                     self.song = Self::unwrap_or_song(&next_song.slot);
 
                 } else {

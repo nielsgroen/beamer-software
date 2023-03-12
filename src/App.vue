@@ -21,13 +21,6 @@ export default {
     const searchAuthor = ref("");
 
     onMounted(async () => {
-      const result: any = await invoke("get_songs", {});
-      songList.value = result.songs;
-      console.log("songList mounted", songList);
-
-      const newToken: string = await invoke("get_genius_token", {});
-      geniusToken.value = newToken;
-
       try {
         await register('right', () => {
           nextVerse();
@@ -38,6 +31,13 @@ export default {
       } catch (error) {
         console.error(error);
       }
+
+      const result: any = await invoke("get_songs", {});
+      songList.value = result.songs;
+      console.log("songList mounted", songList);
+
+      const newToken: string = await invoke("get_genius_token", {});
+      geniusToken.value = newToken;
     })
 
     async function removeFirst() {

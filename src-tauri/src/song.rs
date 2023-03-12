@@ -12,6 +12,15 @@ pub enum SongSlotType {
     // Can add more: Like a picture
 }
 
+impl SongSlotType {
+    pub fn num_verses(&self) -> usize {
+        match self {
+            Self::Empty => 0,
+            Self::Song(ref song) => song.num_verses(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug , Clone)]
 pub struct SongSlot {
     pub id: u64,
