@@ -16,7 +16,7 @@ export default {
 
 <style scoped>
 .verse-container {
-  padding-left: 70px;
+  padding: 30px 70px;
 }
 
 .verse-line {
