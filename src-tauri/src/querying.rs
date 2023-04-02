@@ -1,7 +1,8 @@
+use std::vec;
 use lazy_static::lazy_static;
 use regex::Regex;
 use scraper::Html;
-use crate::ProgramState;
+use crate::{add_song_to_state, ProgramState};
 use crate::song::{Song, SongList, SongSlot, SongSlotType, Verse};
 use tower_service::Service;
 
@@ -13,29 +14,26 @@ pub async fn add_searched_song(
     title: &str,
     program_state: tauri::State<'_, ProgramState>,
 ) -> Result<SongList, String> {
-    let genius_token = program_state.config.read().await.genius_api_token
-        .clone()
-        .ok_or("No Genius API token".to_string())?;
+    let genius_token = read_genius_token(&program_state).await?;
 
     let (song_url, actual_author, actual_title) = find_song_details(author, title, &genius_token).await?;
 
-    let new_song = get_lyrics(
+    let mut new_song = get_lyrics(
         &song_url,
         &actual_author,
         &actual_title
     ).await?;
 
+    if new_song.verses.len() == 0 {
+        new_song.verses = vec![Verse::default()];
+    }
+
+    add_song_to_state(
+        new_song,
+        &program_state,
+    ).await;
+
     let mut song_list = program_state.song_list.write().await;
-    let mut new_song_id = program_state.new_song_id.write().await;
-
-    song_list.songs.push(
-        SongSlot {
-            id: *new_song_id,
-            slot: SongSlotType::Song(new_song),
-        }
-    );
-    *new_song_id += 1;
-
     Ok((*song_list).clone())
 }
 
@@ -120,7 +118,8 @@ async fn find_song_details(
 
 
 fn parse_song_text(document: &Html, remove_block_quotes: bool) -> Vec<Verse> {
-    let lyrics_selector = scraper::Selector::parse("div.Lyrics__Container-sc-1ynbvzw-6.YYrds").unwrap();
+    let lyrics_selector = scraper::Selector::parse(".Lyrics__Container-sc-1ynbvzw-5.Dzxov").unwrap();
+
 
     let html_sections = document.select(&lyrics_selector)
         .map(|x| x.inner_html());
@@ -187,3 +186,12 @@ fn parse_song_text(document: &Html, remove_block_quotes: bool) -> Vec<Verse> {
 
     verses
 }
+
+pub async fn read_genius_token(
+    program_state: &tauri::State<'_, ProgramState>,
+) -> Result<String, String> {
+    program_state.config.read().await.genius_api_token
+        .clone()
+        .ok_or("No Genius API token".to_string())
+}
+

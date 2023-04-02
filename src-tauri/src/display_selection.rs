@@ -77,7 +77,7 @@ impl DisplaySelection {
     }
 
     pub fn next(&mut self, song_list: &SongList) {
-        if self.verse_num < self.song.verses.len() - 1 {
+        if self.verse_num < self.song.verses.len().saturating_sub(1) {
             // Next verse in same song available: Go there
             self.verse_num += 1;
         } else {
@@ -116,7 +116,7 @@ impl DisplaySelection {
         }
     }
 
-    fn unwrap_or_song(slot_type: &SongSlotType) -> Song {
+    pub fn unwrap_or_song(slot_type: &SongSlotType) -> Song {
         match slot_type {
             SongSlotType::Empty => Song::new("Empty Panel", "None", vec![Verse::new(vec![])]),
             SongSlotType::Song(song) => song.clone(),

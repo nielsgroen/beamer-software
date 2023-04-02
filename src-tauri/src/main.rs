@@ -22,7 +22,7 @@ mod querying;
 
 use config::ProgramConfig;
 use crate::display_selection::DisplaySelection;
-
+use crate::song::SongAddition;
 
 
 /// IMPORTANT: ALWAYS ACQUIRE LOCKS IN ORDER LISTED
@@ -54,6 +54,28 @@ async fn update_song_list(
     Ok(())
 }
 
+
+#[tauri::command]
+async fn add_song(
+    author: &str,
+    title: &str,
+    song_text: &str,
+    program_state: tauri::State<'_, ProgramState>,
+) -> Result<SongList, String> {
+    let song = Song::from_song_addition(SongAddition {
+        author: author.to_string(),
+        title: title.to_string(),
+        song_text: song_text.to_string(),
+    });
+
+    add_song_to_state(
+        song,
+        &program_state,
+    ).await;
+
+    let mut song_list = program_state.song_list.write().await;
+    Ok((*song_list).clone())
+}
 
 #[tauri::command]
 async fn get_genius_token(
@@ -125,6 +147,23 @@ async fn previous_verse(
 }
 
 
+async fn add_song_to_state(
+    song: Song,
+    program_state: &tauri::State<'_, ProgramState>,
+) {
+    let mut song_list = program_state.song_list.write().await;
+    let mut new_song_id = program_state.new_song_id.write().await;
+
+    song_list.songs.push(
+        SongSlot {
+            id: *new_song_id,
+            slot: SongSlotType::Song(song),
+        }
+    );
+    *new_song_id += 1;
+}
+
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
@@ -157,6 +196,7 @@ fn main() {
             get_songs,
             get_lyrics,
             add_searched_song,
+            add_song,
             update_song_list,
             get_genius_token,
             set_genius_token,

@@ -51,6 +51,14 @@ impl Song {
     pub fn num_verses(&self) -> usize {
         self.verses.len()
     }
+
+    pub fn from_song_addition(addition: SongAddition) -> Self {
+        Self {
+            title: addition.title,
+            author: addition.author,
+            verses: song_text_to_verses(addition.song_text),
+        }
+    }
 }
 
 impl Verse {
@@ -63,4 +71,37 @@ impl Verse {
     pub fn is_empty(&self) -> bool {
         self.lines.is_empty()
     }
+}
+
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+pub struct SongAddition {
+    pub title: String,
+    pub author: String,
+    pub song_text: String, // To be parsed into verses.
+}
+
+
+pub fn song_text_to_verses(song_text: String) -> Vec<Verse> {
+    let lines = song_text.lines();
+    let mut verses = vec![];
+
+    let mut current_verse_lines = vec![];
+
+    for line in lines {
+        if line.len() == 0 {
+            verses.push(Verse::new(current_verse_lines.clone()));
+            current_verse_lines = vec![];
+        } else {
+            current_verse_lines.push(line.to_owned());
+        }
+    }
+
+    verses.push(Verse::new(current_verse_lines));
+
+    if verses.len() == 0 {
+        verses.push(Verse::default());
+    }
+
+    verses
 }
