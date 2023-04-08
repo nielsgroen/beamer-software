@@ -5,6 +5,7 @@ use scraper::Html;
 use crate::{add_song_to_state, ProgramState};
 use crate::song::{Song, SongList, SongSlot, SongSlotType, Verse};
 use tower_service::Service;
+use crate::display_selection::DisplaySelection;
 
 const SEARCH_URL: &str = "https://api.genius.com/search";
 
@@ -118,8 +119,25 @@ async fn find_song_details(
 
 
 fn parse_song_text(document: &Html, remove_block_quotes: bool) -> Vec<Verse> {
-    let lyrics_selector = scraper::Selector::parse(".Lyrics__Container-sc-1ynbvzw-5.Dzxov").unwrap();
+    // Lyrics__Container([a-zA-Z]|-|\d)+
+    // Remove all divs with contents: usually ads
+    lazy_static! {
+        static ref FIND_LYRICS_CONTAINER_CLASS_REGEX: Regex = Regex::new(r#"Lyrics__Container([a-zA-Z]|-|\d)+"#).unwrap();
+    }
 
+    let document_string = document.html();
+    let mut container_css_class = None;
+    if let Some(capture) = FIND_LYRICS_CONTAINER_CLASS_REGEX.captures(&document_string) {
+        if let Some(capture_match) = capture.get(0) {
+            container_css_class = Some(capture_match.as_str().to_string());
+        }
+    }
+
+    if container_css_class.is_none() {
+        return vec![Verse::default()];
+    }
+    let container_css_class = container_css_class.unwrap();
+    let lyrics_selector = scraper::Selector::parse(&format!(".{container_css_class}")).unwrap();
 
     let html_sections = document.select(&lyrics_selector)
         .map(|x| x.inner_html());
