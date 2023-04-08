@@ -27,6 +27,8 @@ export default {
       songText: "",
     });
 
+    const sidebarVisible = ref(false);
+
     onMounted(async () => {
       try {
         await register('right', () => {
@@ -176,6 +178,7 @@ export default {
       searchTitle,
       searchAuthor,
       songAddition,
+      sidebarVisible,
       processClientSongListUpdate,
       onMounted,
       removeFirst,
@@ -191,6 +194,29 @@ export default {
 </script>
 
 <template>
+  <Sidebar v-model:visible="sidebarVisible" position="right" close-icon="">
+    <h2>Settings</h2>
+    <span class="p-float-label">
+      <InputText id="test-button" type="text" v-model="geniusToken" v-tooltip.left="'visit docs.genius.com or genius.com/api-clients for creating an API key.'" />
+      <label for="test-button">Genius Token</label>
+      <Button label="Save Genius Token" class="p-button-success" @click="saveToken" />
+      <Button label="Save Settings to File" class="p-button-success" @click="saveConfig" />
+    </span>
+  </Sidebar>
+  <div class="topbar">
+    <div class="topbar-content">
+      <div class="topbar-item">
+        <a href="https://github.com/nielsgroen/presentation-test/releases" target="_blank" v-tooltip.bottom="'For finding the newest release, and reporting bugs.'">
+          <i class="pi pi-github topbar-icon"></i>
+        </a>
+      </div>
+      <div class="topbar-item">
+        <a href="#">
+          <i class="pi pi-cog topbar-icon" @click="sidebarVisible = !sidebarVisible"></i>
+        </a>
+      </div>
+    </div>
+  </div>
   <div class="surface-ground px-4 py-8 md:px-6 lg:px-8 max-vh">
     <div class="text-900 font-bold text-6xl mb-4 text-center">Beamer Software</div>
     <div class="grid">
@@ -223,10 +249,6 @@ export default {
       </div>
       <div class="col-4">
         <span class="p-float-label">
-          <InputText id="test-button" type="text" v-model="geniusToken" v-tooltip="'visit docs.genius.com or genius.com/api-clients for creating an API key.'" />
-          <label for="test-button">Genius Token</label>
-          <Button label="Save Genius Token" class="p-button-success" @click="saveToken" />
-          <Button label="Save Config to File" class="p-button-success" @click="saveConfig" />
           <Button label="Previous Verse" class="p-button-help" @click="previousVerse" v-tooltip.bottom="'You can use the left arrow key.'" />
           <Button label="Next Verse" class="p-button-help" @click="nextVerse" v-tooltip.bottom="'You can use the right arrow key.'" />
         </span>
@@ -243,4 +265,30 @@ export default {
 .max-vh {
   height: 100vh;
 }
+
+.topbar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 4rem;
+  padding: 1rem 0;
+  background-color: transparent;
+  z-index: 2000;
+}
+
+.topbar-content {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.topbar-content > * {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.topbar-icon {
+  font-size: 2rem;
+  color: #000000;
+}
+
 </style>

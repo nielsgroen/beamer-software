@@ -10,6 +10,7 @@ import Button from "primevue/button";
 import Textarea from 'primevue/textarea';
 import Toast from "primevue/toast";
 import Panel from "primevue/panel";
+import Sidebar from "primevue/sidebar";
 
 import './css/normalize.css';
 // import './css/skeleton.css';
@@ -33,5 +34,6 @@ app.component('Textarea', Textarea);
 app.component('OrderList', OrderList);
 app.component('Toast', Toast);
 app.component('Panel', Panel);
+app.component('Sidebar', Sidebar);
 app.mount('#app');
 
