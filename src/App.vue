@@ -14,9 +14,10 @@ export default {
   setup() {
     const toast = useToast();
 
-    const selectedSong = ref([]);
     const settings = useSettingsStore();
     const songList = useSongListStore();
+
+    const selectedSong = ref([]);
 
     const searchTitle = ref("");
     const searchAuthor = ref("");
