@@ -206,7 +206,7 @@ export default {
   <div class="topbar">
     <div class="topbar-content">
       <div class="topbar-item">
-        <a href="https://github.com/nielsgroen/presentation-test/releases" target="_blank" v-tooltip.bottom="'For finding the newest release, and reporting bugs.'">
+        <a href="https://github.com/nielsgroen/beamer-software/releases" target="_blank" v-tooltip.bottom="'For finding the newest release, and reporting bugs.'">
           <i class="pi pi-github topbar-icon"></i>
         </a>
       </div>
