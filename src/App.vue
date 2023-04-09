@@ -8,6 +8,7 @@ import Toast from 'primevue/toast';
 import {register} from "@tauri-apps/api/globalShortcut";
 import SongEditor from "./components/SongEditor.vue";
 import {useSettingsStore} from "./stores/settingsStore";
+import {useSongListStore} from "./stores/songListStore";
 
 
 export default {
@@ -15,9 +16,9 @@ export default {
   setup() {
     const toast = useToast();
 
-    const songList = ref([]);
     const selectedSong = ref([]);
     const settings = useSettingsStore();
+    const songList = useSongListStore();
 
     const searchTitle = ref("");
     const searchAuthor = ref("");
@@ -43,20 +44,13 @@ export default {
       }
 
       const result: any = await invoke("get_songs", {});
-      songList.value = result.songs;
-      console.log("songList mounted", songList);
+      songList.songs = result.songs;
 
       const newToken: string = await invoke("get_genius_token", {});
-      settings.setGeniusToken(newToken);
+      settings.geniusToken = newToken;
     })
 
-    async function removeFirst() {
-      const newSongList = songList.value;
-      newSongList.shift();
-      await processClientSongListUpdate(newSongList);
-    }
-
-    async function addSearchedSong(author: String, title: String) {
+    async function addSearchedSong(author: string, title: string) {
       try {
         toast.add({
           severity: "info",
@@ -64,44 +58,20 @@ export default {
           detail: `Searching for ${author} - ${title}.`,
           life: 3000,
         });
-        const result: any = await invoke('add_searched_song', { author, title });
-        songList.value = result.songs;
+        // const result: any = await invoke('add_searched_song', { author, title });
+        await songList.addSearchedSong(author, title);
         toast.add({
           severity: "success",
           summary: "Song Added",
           detail: `${author} - ${title} was added.`,
           life: 3000,
         });
-        console.log("Toast called");
       } catch (error) {
         console.error(error);
-        console.log("error called");
         toast.add({
           severity: "error",
           summary: "Failed to load song",
           detail: error,
-          life: 3000,
-        })
-      }
-    }
-
-    async function processClientSongListUpdate(newSongList: any) {
-      console.log("process", newSongList);
-
-      try {
-        const result = await invoke("update_song_list", {
-          newSongList: {
-            songs: newSongList
-          }
-        });
-        console.log("result", result);
-
-        songList.value = newSongList;
-      } catch (error) {
-        toast.add({
-          severity: "error",
-          summary: "update failed",
-          detail: "Failed to update the song list.",
           life: 3000,
         })
       }
@@ -143,8 +113,7 @@ export default {
           detail: "The song is being added.",
           life: 3000,
         });
-        const newSongList: any = await invoke("add_song", songAddition.value);
-        songList.value = newSongList.songs;
+        await songList.addSong(songAddition.value);
         toast.add({
           severity: "success",
           summary: "Addition successful",
@@ -152,6 +121,7 @@ export default {
           life: 3000,
         });
       } catch (error) {
+        console.error(error);
         toast.add({
           severity: "error",
           summary: "Addition failed",
@@ -160,12 +130,6 @@ export default {
         });
       }
     }
-
-
-    watch(songList, (currentValue, oldValue) => {
-      console.log("old val", oldValue);
-      console.log("new val", currentValue);
-    });
 
     watch(selectedSong, (currentValue, oldValue) => {
       console.log("old selected", oldValue);
@@ -180,9 +144,7 @@ export default {
       searchAuthor,
       songAddition,
       sidebarVisible,
-      processClientSongListUpdate,
       onMounted,
-      removeFirst,
       addSearchedSong,
       saveToken,
       saveConfig,
@@ -224,7 +186,7 @@ export default {
       <div class="col-12 lg:col-8">
         <div class="p-3 h-full">
           <div class="shadow-2 p-3 h-full flex flex-column surface-card">
-            <SongList :model-value="songList" @update:model-value="processClientSongListUpdate($event)" @update:song-selection="selectedSong = $event" />
+            <SongList :model-value="songList.songs" @update:model-value="songList.updateBackend($event)" @update:song-selection="selectedSong = $event" />
             <div class="grid">
               <div class="col-6">
                 <span class="p-float-label">
@@ -239,7 +201,7 @@ export default {
                 </span>
               </div>
               <div class="col-6">
-                <Button label="Remove First Song" class="p-button-danger" @click="removeFirst" />
+                <Button label="Remove First Song" class="p-button-danger" @click="songList.removeFirst" />
               </div>
               <div class="col-6">
                 <Button label="Add Searched Song" class="p-button-success" @click="addSearchedSong(searchAuthor, searchTitle)" />
