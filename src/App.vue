@@ -7,6 +7,7 @@ import {useToast} from "primevue/usetoast";
 import Toast from 'primevue/toast';
 import {register} from "@tauri-apps/api/globalShortcut";
 import SongEditor from "./components/SongEditor.vue";
+import {useSettingsStore} from "./stores/settingsStore";
 
 
 export default {
@@ -16,7 +17,7 @@ export default {
 
     const songList = ref([]);
     const selectedSong = ref([]);
-    const geniusToken = ref("");
+    const settings = useSettingsStore();
 
     const searchTitle = ref("");
     const searchAuthor = ref("");
@@ -46,7 +47,7 @@ export default {
       console.log("songList mounted", songList);
 
       const newToken: string = await invoke("get_genius_token", {});
-      geniusToken.value = newToken;
+      settings.setGeniusToken(newToken);
     })
 
     async function removeFirst() {
@@ -107,7 +108,7 @@ export default {
     }
 
     async function saveToken() {
-      await invoke("set_genius_token", { newToken: geniusToken.value });
+      await invoke("set_genius_token", { newToken: settings.geniusToken });
     }
 
     async function saveConfig() {
@@ -174,7 +175,7 @@ export default {
     return {
       songList,
       selectedSong,
-      geniusToken,
+      settings,
       searchTitle,
       searchAuthor,
       songAddition,
@@ -197,7 +198,7 @@ export default {
   <Sidebar v-model:visible="sidebarVisible" position="right" close-icon="">
     <h2>Settings</h2>
     <span class="p-float-label">
-      <InputText id="test-button" type="text" v-model="geniusToken" v-tooltip.left="'visit docs.genius.com or genius.com/api-clients for creating an API key.'" />
+      <InputText id="test-button" type="text" v-model="settings.geniusToken" v-tooltip.left="'visit docs.genius.com or genius.com/api-clients for creating an API key.'" />
       <label for="test-button">Genius Token</label>
       <Button label="Save Genius Token" class="p-button-success" @click="saveToken" />
       <Button label="Save Settings to File" class="p-button-success" @click="saveConfig" />

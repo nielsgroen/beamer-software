@@ -1,4 +1,5 @@
 import { createApp } from 'vue';
+import { createPinia } from "pinia";
 // import './style.css';
 import App from './App.vue';
 import PrimeVue from 'primevue/config';
@@ -24,8 +25,10 @@ import OrderList from "primevue/orderlist"; //icons
 
 
 const app = createApp(App);
+const pinia = createPinia();
 app.use(PrimeVue);
 app.use(ToastService);
+app.use(pinia);
 app.directive('tooltip', Tooltip);
 
 app.component('InputText', InputText);
