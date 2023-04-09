@@ -1,10 +1,8 @@
 <script lang="ts">
 import {onMounted, ref, watch} from "vue";
-// import SongEditor from "./components/SongEditor.vue";
 import {invoke} from "@tauri-apps/api";
 import SongList from "./components/SongList.vue";
 import {useToast} from "primevue/usetoast";
-import Toast from 'primevue/toast';
 import {register} from "@tauri-apps/api/globalShortcut";
 import SongEditor from "./components/SongEditor.vue";
 import {useSettingsStore} from "./stores/settingsStore";
@@ -46,8 +44,7 @@ export default {
       const result: any = await invoke("get_songs", {});
       songList.songs = result.songs;
 
-      const newToken: string = await invoke("get_genius_token", {});
-      settings.geniusToken = newToken;
+      settings.geniusToken = await invoke("get_genius_token", {});
     })
 
     async function addSearchedSong(author: string, title: string) {
@@ -74,18 +71,6 @@ export default {
           detail: error,
           life: 3000,
         })
-      }
-    }
-
-    async function saveToken() {
-      await invoke("set_genius_token", { newToken: settings.geniusToken });
-    }
-
-    async function saveConfig() {
-      try {
-        await invoke("save_config", {});
-      } catch (error) {
-        console.error(error);
       }
     }
 
@@ -146,8 +131,6 @@ export default {
       sidebarVisible,
       onMounted,
       addSearchedSong,
-      saveToken,
-      saveConfig,
       nextVerse,
       previousVerse,
       addSong,
@@ -162,8 +145,8 @@ export default {
     <span class="p-float-label">
       <InputText id="test-button" type="text" v-model="settings.geniusToken" v-tooltip.left="'visit docs.genius.com or genius.com/api-clients for creating an API key.'" />
       <label for="test-button">Genius Token</label>
-      <Button label="Save Genius Token" class="p-button-success" @click="saveToken" />
-      <Button label="Save Settings to File" class="p-button-success" @click="saveConfig" />
+      <Button label="Save Genius Token" class="p-button-success" @click="settings.setToken" />
+      <Button label="Save Settings to File" class="p-button-success" @click="settings.saveSettings" />
     </span>
   </Sidebar>
   <div class="topbar">
