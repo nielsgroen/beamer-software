@@ -290,5 +290,13 @@ export default {
   font-size: 2rem;
   color: #000000;
 }
+</style>
 
+<style>
+/*
+Unscoped style to override sidebar close button showing up
+ */
+.p-sidebar-header .p-sidebar-close {
+  display: none;
+}
 </style>
