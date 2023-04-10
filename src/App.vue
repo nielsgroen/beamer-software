@@ -79,24 +79,6 @@ export default {
       }
     }
 
-    // async function nextVerse() {
-    //   try {
-    //     const result = await invoke("next_verse", {});
-    //     console.log("display_selections: ", result);
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // }
-    //
-    // async function previousVerse() {
-    //   try {
-    //     const result = await invoke("previous_verse", {});
-    //     console.log("display_selections: ", result);
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // }
-
     async function addSong() {
       try {
         toast.add({
