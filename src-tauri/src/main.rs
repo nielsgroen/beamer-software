@@ -87,6 +87,15 @@ async fn get_genius_token(
 }
 
 #[tauri::command]
+async fn get_font_size(
+    program_state: tauri::State<'_, ProgramState>,
+) -> Result<String, ()> {
+    let config = program_state.config.read().await;
+
+    Ok((*config).font_size.clone())
+}
+
+#[tauri::command]
 async fn set_genius_token(
     new_token: String,
     program_state: tauri::State<'_, ProgramState>,
@@ -99,6 +108,19 @@ async fn set_genius_token(
 }
 
 #[tauri::command]
+async fn set_font_size(
+    new_font_size: String,
+    program_state: tauri::State<'_, ProgramState>,
+    app_handle: tauri::AppHandle,
+) -> Result<(), ()> {
+    let mut config = program_state.config.write().await;
+    config.font_size = new_font_size.clone();
+
+    app_handle.emit_to("presentation", "update-font-size", new_font_size).expect("could not emit update-font-size");
+    Ok(())
+}
+
+#[tauri::command]
 async fn save_config(
     program_state: tauri::State<'_, ProgramState>,
 ) -> Result<(), String> {
@@ -107,7 +129,6 @@ async fn save_config(
     let json = serde_json::to_string(&*config).map_err(|x| "Unable to parse JSON".to_string())?;
     // fs::write(config.config_path.clone(), json).map_err(|x| "Unable to write to config".to_string())?;
     let new_path = config.config_path.clone();
-    println!("config path {:?}", new_path);
     fs::create_dir_all(config.config_path.parent().unwrap()).unwrap();
     fs::write(new_path, json).unwrap();
 
@@ -174,6 +195,10 @@ fn main() {
 
             let mut config: ProgramConfig = fs::read_to_string(&config_path).ok().and_then(|x| serde_json::from_str(&x).ok()).unwrap_or_default();
             config.config_path = config_path;
+            if config.font_size.len() == 0 {
+                config.font_size = "2.5rem".to_string();
+            }
+            println!("config: {config:?}");
 
             let song_list = SongList {
                 songs: vec![
@@ -199,7 +224,9 @@ fn main() {
             add_song,
             update_song_list,
             get_genius_token,
+            get_font_size,
             set_genius_token,
+            set_font_size,
             save_config,
             next_verse,
             previous_verse,

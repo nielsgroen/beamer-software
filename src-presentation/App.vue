@@ -10,13 +10,19 @@ export default {
   setup() {
     const currentVerse = ref(null);
     const isFullScreen = ref(false);
+    const fontSize = ref("2.5rem");
 
     listen('update-verse', (event) => {
       currentVerse.value = event.payload;
       console.log(event.payload);
     })
 
-    console.log("setup run")
+    listen('update-font-size', (event) => {
+      fontSize.value = event.payload;
+      console.log(event.payload);
+    })
+
+    console.log("setup run");
 
     async function toggleFullScreen() {
       isFullScreen.value = !isFullScreen.value;
@@ -25,6 +31,7 @@ export default {
 
     return {
       currentVerse,
+      fontSize,
       toggleFullScreen,
     }
   }
@@ -33,7 +40,7 @@ export default {
 
 <template>
   <div id="presentation-app">
-    <VerseDisplay v-model="currentVerse" />
+    <VerseDisplay v-model="currentVerse" :font-size="fontSize" />
     <ScreenSizeToggle @changeFullScreen="toggleFullScreen" />
   </div>
 </template>

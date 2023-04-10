@@ -45,7 +45,7 @@ export default {
       const result: any = await invoke("get_songs", {});
       songList.songs = result.songs;
 
-      settings.geniusToken = await invoke("get_genius_token", {});
+      await settings.load();
     })
 
     async function addSearchedSong(author: string, title: string) {
@@ -143,11 +143,18 @@ export default {
 <template>
   <Sidebar v-model:visible="sidebarVisible" position="right" close-icon="">
     <h2>Settings</h2>
-    <span class="p-float-label">
-      <InputText id="test-button" type="text" v-model="settings.geniusToken" v-tooltip.left="'visit docs.genius.com or genius.com/api-clients for creating an API key.'" />
-      <label for="test-button">Genius Token</label>
-      <Button label="Save Genius Token" class="p-button-success" @click="settings.setToken" />
-      <Button label="Save Settings to File" class="p-button-success" @click="settings.saveSettings" />
+    <span class="flex flex-column settings-form-group">
+      <label for="geniustoken-input">Genius API Token</label>
+      <InputText id="geniustoken-input" type="text" placeholder="API Token" :model-value="settings.geniusToken" @blur="settings.setToken($event.target.value)" v-tooltip.left="'visit docs.genius.com or genius.com/api-clients for creating an API key.'" />
+      <small>An API token is required for searching songs.</small>
+      <small>Create an API token at <a href="https://genius.com/api-clients" target="_blank">genius.com</a>.</small>
+    </span>
+    <span class="flex flex-column settings-form-group">
+      <label for="fontsize-input">Presentation Font Size</label>
+      <InputText id="fontsize-input" type="text" placeholder="Font Size" :model-value="settings.fontSize" @blur="settings.setFontSize($event.target.value)" />
+      <small>The font size used for the presentation text.</small>
+      <small>A sensible default is '2.5rem'.</small>
+      <small>You can also specify values in em or px.</small>
     </span>
   </Sidebar>
   <div class="topbar">
@@ -164,7 +171,7 @@ export default {
       </div>
     </div>
   </div>
-  <div class="surface-ground px-4 py-8 md:px-6 lg:px-8 max-vh">
+  <div class="surface-ground px-4 py-8 md:px-6 lg:px-8">
     <div class="text-900 font-bold text-6xl mb-4 text-center">Beamer Software</div>
     <div class="grid">
       <div class="col-12 lg:col-8">
@@ -209,10 +216,6 @@ export default {
 </template>
 
 <style scoped>
-.max-vh {
-  height: 100vh;
-}
-
 .topbar {
   position: fixed;
   top: 0;
@@ -236,6 +239,10 @@ export default {
 .topbar-icon {
   font-size: 2rem;
   color: #000000;
+}
+
+.settings-form-group {
+  margin-bottom: 20px;
 }
 </style>
 
