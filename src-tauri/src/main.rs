@@ -21,8 +21,10 @@ mod display_selection;
 mod querying;
 
 use config::ProgramConfig;
-use crate::display_selection::DisplaySelection;
-use crate::song::SongAddition;
+use config::{get_genius_token, get_font_size, set_genius_token, set_font_size, save_config};
+use display_selection::DisplaySelection;
+use display_selection::{next_verse, previous_verse, get_display_selection};
+use song::SongAddition;
 
 
 /// IMPORTANT: ALWAYS ACQUIRE LOCKS IN ORDER LISTED
@@ -76,97 +78,6 @@ async fn add_song(
     let mut song_list = program_state.song_list.write().await;
     Ok((*song_list).clone())
 }
-
-#[tauri::command]
-async fn get_genius_token(
-    program_state: tauri::State<'_, ProgramState>,
-) -> Result<String, ()> {
-    let config = program_state.config.read().await;
-
-    Ok((*config).genius_api_token.clone().unwrap_or("".to_string()))
-}
-
-#[tauri::command]
-async fn get_font_size(
-    program_state: tauri::State<'_, ProgramState>,
-) -> Result<String, ()> {
-    let config = program_state.config.read().await;
-
-    Ok((*config).font_size.clone())
-}
-
-#[tauri::command]
-async fn set_genius_token(
-    new_token: String,
-    program_state: tauri::State<'_, ProgramState>,
-) -> Result<(), ()> {
-    let mut config = program_state.config.write().await;
-
-    config.genius_api_token = Some(new_token);
-
-    Ok(())
-}
-
-#[tauri::command]
-async fn set_font_size(
-    new_font_size: String,
-    program_state: tauri::State<'_, ProgramState>,
-    app_handle: tauri::AppHandle,
-) -> Result<(), ()> {
-    let mut config = program_state.config.write().await;
-    config.font_size = new_font_size.clone();
-
-    app_handle.emit_to("presentation", "update-font-size", new_font_size).expect("could not emit update-font-size");
-    Ok(())
-}
-
-#[tauri::command]
-async fn save_config(
-    program_state: tauri::State<'_, ProgramState>,
-) -> Result<(), String> {
-    let config = program_state.config.read().await;
-
-    let json = serde_json::to_string(&*config).map_err(|x| "Unable to parse JSON".to_string())?;
-    // fs::write(config.config_path.clone(), json).map_err(|x| "Unable to write to config".to_string())?;
-    let new_path = config.config_path.clone();
-    fs::create_dir_all(config.config_path.parent().unwrap()).unwrap();
-    fs::write(new_path, json).unwrap();
-
-    Ok(())
-}
-
-#[tauri::command]
-async fn next_verse(
-    program_state: tauri::State<'_, ProgramState>,
-    app_handle: tauri::AppHandle,
-) -> Result<(), String> {
-    use tauri::Manager;
-
-    let song_list = program_state.song_list.read().await;
-    let mut selection = program_state.currently_selected.write().await;
-
-    selection.next(&song_list);
-    app_handle.emit_to("presentation", "update-verse", selection.current_verse()).expect("could not emit update-verse");
-
-    Ok(())
-}
-
-#[tauri::command]
-async fn previous_verse(
-    program_state: tauri::State<'_, ProgramState>,
-    app_handle: tauri::AppHandle,
-) -> Result<(), String> {
-    use tauri::Manager;
-
-    let song_list = program_state.song_list.read().await;
-    let mut selection = program_state.currently_selected.write().await;
-
-    selection.previous(&song_list);
-    app_handle.emit_to("presentation", "update-verse", selection.current_verse()).expect("could not emit update-verse");
-
-    Ok(())
-}
-
 
 async fn add_song_to_state(
     song: Song,
@@ -230,6 +141,7 @@ fn main() {
             save_config,
             next_verse,
             previous_verse,
+            get_display_selection,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

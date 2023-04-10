@@ -5,17 +5,20 @@ import SongList from "./components/SongList.vue";
 import {useToast} from "primevue/usetoast";
 import {register} from "@tauri-apps/api/globalShortcut";
 import SongEditor from "./components/SongEditor.vue";
+import SelectionDisplay from "./components/SelectionDisplay.vue";
 import {useSettingsStore} from "./stores/settingsStore";
 import {useSongListStore} from "./stores/songListStore";
+import {useDisplaySelectionStore} from "./stores/displaySelectionStore";
 
 
 export default {
-  components: {SongEditor, SongList},
+  components: {SelectionDisplay, SongEditor, SongList},
   setup() {
     const toast = useToast();
 
     const settings = useSettingsStore();
     const songList = useSongListStore();
+    const displaySelection = useDisplaySelectionStore();
 
     const selectedSong = ref([]);
 
@@ -33,10 +36,10 @@ export default {
     onMounted(async () => {
       try {
         await register('right', () => {
-          nextVerse();
+          displaySelection.nextVerse();
         });
         await register('left', () => {
-          previousVerse();
+          displaySelection.previousVerse();
         });
       } catch (error) {
         console.error(error);
@@ -46,6 +49,7 @@ export default {
       songList.songs = result.songs;
 
       await settings.load();
+      await displaySelection.load();
     })
 
     async function addSearchedSong(author: string, title: string) {
@@ -75,21 +79,23 @@ export default {
       }
     }
 
-    async function nextVerse() {
-      try {
-        await invoke("next_verse", {});
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    async function previousVerse() {
-      try {
-        await invoke("previous_verse", {});
-      } catch (error) {
-        console.error(error);
-      }
-    }
+    // async function nextVerse() {
+    //   try {
+    //     const result = await invoke("next_verse", {});
+    //     console.log("display_selections: ", result);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // }
+    //
+    // async function previousVerse() {
+    //   try {
+    //     const result = await invoke("previous_verse", {});
+    //     console.log("display_selections: ", result);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // }
 
     async function addSong() {
       try {
@@ -126,14 +132,13 @@ export default {
       songList,
       selectedSong,
       settings,
+      displaySelection,
       searchTitle,
       searchAuthor,
       songAddition,
       sidebarVisible,
       onMounted,
       addSearchedSong,
-      nextVerse,
-      previousVerse,
       addSong,
     }
   }
@@ -171,7 +176,7 @@ export default {
       </div>
     </div>
   </div>
-  <div class="surface-ground px-4 py-8 md:px-6 lg:px-8">
+  <div class="main-body surface-ground px-4 md:px-6 lg:px-8">
     <div class="text-900 font-bold text-6xl mb-4 text-center">Beamer Software</div>
     <div class="grid">
       <div class="col-12 lg:col-8">
@@ -202,14 +207,13 @@ export default {
         </div>
       </div>
       <div class="col-4">
-        <span class="p-float-label">
-          <Button label="Previous Verse" class="p-button-help" @click="previousVerse" v-tooltip.bottom="'You can use the left arrow key.'" />
-          <Button label="Next Verse" class="p-button-help" @click="nextVerse" v-tooltip.bottom="'You can use the right arrow key.'" />
-        </span>
       </div>
       <div class="col-12">
         <SongEditor v-model="songAddition" @add-song="addSong" />
       </div>
+    </div>
+    <div class="bottom-bar">
+      <SelectionDisplay />
     </div>
     <Toast />
   </div>
@@ -243,6 +247,26 @@ export default {
 
 .settings-form-group {
   margin-bottom: 20px;
+}
+
+.main-body {
+  padding-top: 5rem;
+  padding-bottom: 160px;
+}
+
+.bottom-bar {
+  position: fixed;
+  background-color: #dbb57f;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  /*padding-left: 10rem;*/
+  /*padding-right: 10rem;*/
+  padding: 5px 5rem;
+  /*border-top: 1px solid #999999;*/
+  /*box-shadow: 0 0 2px 2px #dbb57f;*/
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.03), 0 0 2px rgba(0, 0, 0, 0.06), 0 0 6px rgba(0, 0, 0, 0.12);
+  /*color: #ffffff;*/
 }
 </style>
 

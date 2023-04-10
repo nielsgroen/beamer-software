@@ -1,6 +1,7 @@
 use std::cmp::{max, min};
 use std::vec;
 use serde::Serialize;
+use crate::ProgramState;
 use crate::song::{Song, SongList, SongSlotType, Verse};
 
 /// For tracking which verse to currently show
@@ -122,4 +123,55 @@ impl DisplaySelection {
             SongSlotType::Song(song) => song.clone(),
         }
     }
+}
+
+
+#[tauri::command]
+pub async fn next_verse(
+    program_state: tauri::State<'_, ProgramState>,
+    app_handle: tauri::AppHandle,
+) -> Result<(DisplaySelection, DisplaySelection), String> {
+    use tauri::Manager;
+
+    let song_list = program_state.song_list.read().await;
+    let mut selection = program_state.currently_selected.write().await;
+
+    selection.next(&song_list);
+    app_handle.emit_to("presentation", "update-verse", selection.current_verse()).expect("could not emit update-verse");
+
+    let mut next_selection = selection.clone();
+    next_selection.next(&song_list);
+    Ok((selection.clone(), next_selection))
+}
+
+#[tauri::command]
+pub async fn previous_verse(
+    program_state: tauri::State<'_, ProgramState>,
+    app_handle: tauri::AppHandle,
+) -> Result<(DisplaySelection, DisplaySelection), String> {
+    use tauri::Manager;
+
+    let song_list = program_state.song_list.read().await;
+    let mut selection = program_state.currently_selected.write().await;
+
+    selection.previous(&song_list);
+    app_handle.emit_to("presentation", "update-verse", selection.current_verse()).expect("could not emit update-verse");
+
+    let mut next_selection = selection.clone();
+    next_selection.next(&song_list);
+    Ok((selection.clone(), next_selection))
+}
+
+#[tauri::command]
+pub async fn get_display_selection(
+    program_state: tauri::State<'_, ProgramState>,
+) -> Result<(DisplaySelection, DisplaySelection), String> {
+    let song_list = program_state.song_list.read().await;
+    let selection = program_state.currently_selected.read().await;
+
+    let display_selection = selection.clone();
+    let mut next_display_selection = display_selection.clone();
+    next_display_selection.next(&song_list);
+
+    Ok((display_selection, next_display_selection))
 }
