@@ -165,7 +165,7 @@ export default {
         </a>
       </div>
       <div class="topbar-item">
-        <a href="#">
+        <a href="javascript:void(0)">
           <i class="pi pi-cog topbar-icon" @click="sidebarVisible = !sidebarVisible"></i>
         </a>
       </div>
