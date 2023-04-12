@@ -1,6 +1,7 @@
 use std::cmp::{max, min};
 use std::vec;
 use serde::Serialize;
+use tauri::Manager;
 use crate::ProgramState;
 use crate::song::{Song, SongList, SongSlotType, Verse};
 
@@ -130,7 +131,7 @@ impl DisplaySelection {
 pub async fn next_verse(
     program_state: tauri::State<'_, ProgramState>,
     app_handle: tauri::AppHandle,
-) -> Result<(DisplaySelection, DisplaySelection), String> {
+) -> Result<(), String> {
     use tauri::Manager;
 
     let song_list = program_state.song_list.read().await;
@@ -139,16 +140,19 @@ pub async fn next_verse(
     selection.next(&song_list);
     app_handle.emit_to("presentation", "update-verse", selection.current_verse()).expect("could not emit update-verse");
 
-    let mut next_selection = selection.clone();
-    next_selection.next(&song_list);
-    Ok((selection.clone(), next_selection))
+    let display_selection = selection.clone();
+    let mut next_display_selection= selection.clone();
+    next_display_selection.next(&song_list);
+
+    app_handle.emit_to("main", "update-display-selection", (display_selection, next_display_selection)).expect("could not emit update-display-selection");
+    Ok(())
 }
 
 #[tauri::command]
 pub async fn previous_verse(
     program_state: tauri::State<'_, ProgramState>,
     app_handle: tauri::AppHandle,
-) -> Result<(DisplaySelection, DisplaySelection), String> {
+) -> Result<(), String> {
     use tauri::Manager;
 
     let song_list = program_state.song_list.read().await;
@@ -157,9 +161,12 @@ pub async fn previous_verse(
     selection.previous(&song_list);
     app_handle.emit_to("presentation", "update-verse", selection.current_verse()).expect("could not emit update-verse");
 
-    let mut next_selection = selection.clone();
-    next_selection.next(&song_list);
-    Ok((selection.clone(), next_selection))
+    let mut next_display_selection = selection.clone();
+    let display_selection = selection.clone();
+    next_display_selection.next(&song_list);
+
+    app_handle.emit_to("main", "update-display-selection", (display_selection, next_display_selection)).expect("could not emit update-display-selection");
+    Ok(())
 }
 
 #[tauri::command]

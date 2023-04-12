@@ -1,9 +1,10 @@
 <script lang="ts">
 import VerseDisplay from "./components/VerseDisplay.vue";
 import ScreenSizeToggle from "./components/ScreenSizeToggle.vue";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import {listen} from "@tauri-apps/api/event";
 import { appWindow } from "@tauri-apps/api/window";
+import {invoke} from "@tauri-apps/api";
 
 export default {
   components: {VerseDisplay, ScreenSizeToggle},
@@ -21,6 +22,10 @@ export default {
       fontSize.value = event.payload;
       console.log(event.payload);
     })
+
+    onMounted(async () => {
+      fontSize.value = await invoke("get_font_size", {});
+    });
 
     console.log("setup run");
 

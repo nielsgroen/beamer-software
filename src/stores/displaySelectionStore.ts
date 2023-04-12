@@ -37,16 +37,10 @@ export const useDisplaySelectionStore = defineStore('displaySelection', {
             this.nextDisplay = result[1];
         },
         async nextVerse() {
-            const result: any = await invoke("next_verse", {});
-            console.log("display_selections: ", result);
-            this.currentDisplay = result[0];
-            this.nextDisplay = result[1];
+            await invoke("next_verse", {});
         },
         async previousVerse() {
-            const result: any = await invoke("previous_verse", {});
-            console.log("display_selections: ", result);
-            this.currentDisplay = result[0];
-            this.nextDisplay = result[1];
+            await invoke("previous_verse", {});
         },
     }
 })

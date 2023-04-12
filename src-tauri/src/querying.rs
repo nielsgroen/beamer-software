@@ -14,7 +14,10 @@ pub async fn add_searched_song(
     author: &str,
     title: &str,
     program_state: tauri::State<'_, ProgramState>,
+    app_handle: tauri::AppHandle,
 ) -> Result<SongList, String> {
+    use tauri::Manager;
+
     let genius_token = read_genius_token(&program_state).await?;
 
     let (song_url, actual_author, actual_title) = find_song_details(author, title, &genius_token).await?;
@@ -35,6 +38,13 @@ pub async fn add_searched_song(
     ).await;
 
     let mut song_list = program_state.song_list.write().await;
+
+    let display_selection = program_state.currently_selected.read().await;
+    let display_selection = display_selection.clone();
+    let mut next_display_selection = display_selection.clone();
+    next_display_selection.next(&song_list);
+    app_handle.emit_to("main", "update-display-selection", (display_selection, next_display_selection)).expect("could not emit update-display-selection");
+
     Ok((*song_list).clone())
 }
 

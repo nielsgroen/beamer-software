@@ -9,6 +9,7 @@ import SelectionDisplay from "./components/SelectionDisplay.vue";
 import {useSettingsStore} from "./stores/settingsStore";
 import {useSongListStore} from "./stores/songListStore";
 import {useDisplaySelectionStore} from "./stores/displaySelectionStore";
+import {listen} from "@tauri-apps/api/event";
 
 
 export default {
@@ -32,6 +33,11 @@ export default {
     });
 
     const sidebarVisible = ref(false);
+
+    listen('update-display-selection', (event: any) => {
+      displaySelection.currentDisplay = event.payload[0];
+      displaySelection.nextDisplay = event.payload[1];
+    });
 
     onMounted(async () => {
       try {

@@ -49,9 +49,18 @@ async fn get_songs(
 async fn update_song_list(
     new_song_list: SongList,
     program_state: tauri::State<'_, ProgramState>,
+    app_handle: tauri::AppHandle,
 ) -> Result<(), ()> {
+    use tauri::Manager;
+
     let mut song_list = program_state.song_list.write().await;
     *song_list = new_song_list;
+
+    let display_selection = program_state.currently_selected.read().await;
+    let display_selection = display_selection.clone();
+    let mut next_display_selection = display_selection.clone();
+    next_display_selection.next(&song_list);
+    app_handle.emit_to("main", "update-display-selection", (display_selection, next_display_selection)).expect("could not emit update-display-selection");
 
     Ok(())
 }
@@ -63,7 +72,10 @@ async fn add_song(
     title: &str,
     song_text: &str,
     program_state: tauri::State<'_, ProgramState>,
+    app_handle: tauri::AppHandle,
 ) -> Result<SongList, String> {
+    use tauri::Manager;
+
     let song = Song::from_song_addition(SongAddition {
         author: author.to_string(),
         title: title.to_string(),
@@ -76,6 +88,13 @@ async fn add_song(
     ).await;
 
     let mut song_list = program_state.song_list.write().await;
+
+    let display_selection = program_state.currently_selected.read().await;
+    let display_selection = display_selection.clone();
+    let mut next_display_selection = display_selection.clone();
+    next_display_selection.next(&song_list);
+    app_handle.emit_to("main", "update-display-selection", (display_selection, next_display_selection)).expect("could not emit update-display-selection");
+
     Ok((*song_list).clone())
 }
 
