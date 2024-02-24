@@ -171,26 +171,29 @@ export default {
         <div class="p-3 h-full">
           <div class="shadow-2 p-3 h-full flex flex-column surface-card">
             <SongList :model-value="songList.songs" @update:model-value="songList.updateBackend($event)" @update:song-selection="selectedSong = $event" />
-            <div class="grid">
-              <div class="col-6">
-                <span class="p-float-label">
-                  <InputText id="search-author" type="text" v-model="searchAuthor" />
-                  <label for="search-author">Search Author</label>
-                </span>
+            <form @submit.prevent="addSearchedSong(searchAuthor, searchTitle)">
+              <div class="grid search-form">
+                <div class="col-6">
+                  <span class="p-float-label">
+                    <InputText id="search-author" type="text" v-model="searchAuthor" />
+                    <label for="search-author">Search Author</label>
+                  </span>
+                </div>
+                <div class="col-6">
+                  <span class="p-float-label">
+                    <InputText id="search-title" type="text" v-model="searchTitle" />
+                    <label for="search-title">Search Title</label>
+                  </span>
+                </div>
+                <div class="col-6">
+                  <Button label="Remove Selected Song" class="p-button-danger" @click="songList.removeById(selectedSong[0].id)" />
+                </div>
+                <div class="col-6">
+                  <input type="submit" value="Add Searched Song" class="hidden" />
+                  <Button label="Add Searched Song" class="p-button-success" @click="addSearchedSong(searchAuthor, searchTitle)" />
+                </div>
               </div>
-              <div class="col-6">
-                <span class="p-float-label">
-                  <InputText id="search-title" type="text" v-model="searchTitle" />
-                  <label for="search-title">Search Title</label>
-                </span>
-              </div>
-              <div class="col-6">
-                <Button label="Remove Selected Song" class="p-button-danger" @click="songList.removeById(selectedSong[0].id)" />
-              </div>
-              <div class="col-6">
-                <Button label="Add Searched Song" class="p-button-success" @click="addSearchedSong(searchAuthor, searchTitle)" />
-              </div>
-            </div>
+            </form>
           </div>
         </div>
       </div>
@@ -264,5 +267,9 @@ Unscoped style to override sidebar close button showing up
  */
 .p-sidebar-header .p-sidebar-close {
   display: none;
+}
+
+.search-form {
+  padding: 2em 0 0 0;
 }
 </style>
