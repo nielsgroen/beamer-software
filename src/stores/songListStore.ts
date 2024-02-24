@@ -20,6 +20,13 @@ export const useSongListStore = defineStore('songList', {
 
             await this.updateBackend(newSongs);
         },
+        async removeById(song_id: any) {
+            console.log("song_id", song_id);
+            let newSongs: any = this.songs;
+            newSongs = newSongs.filter((song: any) => song.id != song_id)
+
+            await this.updateBackend(newSongs);
+        },
         async addSearchedSong(author: string, title: string) {
             const result: any = await invoke('add_searched_song', { author, title });
             this.songs = result.songs;

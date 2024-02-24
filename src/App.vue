@@ -185,7 +185,7 @@ export default {
                 </span>
               </div>
               <div class="col-6">
-                <Button label="Remove First Song" class="p-button-danger" @click="songList.removeFirst" />
+                <Button label="Remove Selected Song" class="p-button-danger" @click="songList.removeById(selectedSong[0].id)" />
               </div>
               <div class="col-6">
                 <Button label="Add Searched Song" class="p-button-success" @click="addSearchedSong(searchAuthor, searchTitle)" />
